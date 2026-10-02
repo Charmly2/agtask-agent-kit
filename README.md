@@ -5,7 +5,7 @@
 [![MCP](https://img.shields.io/badge/MCP-compatible-blue)](https://modelcontextprotocol.io)
 [![Python](https://img.shields.io/badge/python-3.8%2B-green)]()
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![CI](https://github.com/charmlay/agtask-agent-kit/actions/workflows/ci.yml/badge.svg)](../../actions)
+[![CI](https://github.com/Charmly2/agtask-agent-kit/actions/workflows/ci.yml/badge.svg)](../../actions)
 
 ---
 

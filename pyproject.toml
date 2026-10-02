@@ -27,7 +27,7 @@ sdk = ["httpx>=0.24"]
 [project.urls]
 Homepage = "https://agtask.cn"
 Documentation = "https://agtask.cn/docs"
-Repository = "https://github.com/charmlay/agtask-agent-kit"
+Repository = "https://github.com/Charmly2/agtask-agent-kit"
 
 [project.scripts]
 agtask-mcp = "agtask_mcp:main"

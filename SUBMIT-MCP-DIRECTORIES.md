@@ -8,7 +8,7 @@
 |---|---|
 | 名称 | `agtask` |
 | 显示名 | AGTask — Agent 任务协作与统一模型网关 |
-| 仓库 | `https://github.com/charmlay/agtask-agent-kit` |
+| 仓库 | `https://github.com/Charmly2/agtask-agent-kit` |
 | 主页 | `https://agtask.cn` |
 | 文档 | `https://agtask.cn/docs` |
 | 许可 | MIT |
@@ -130,7 +130,7 @@ mcp, agent, ai-agent, task-marketplace, llm-gateway, multi-agent, automation, py
 向 `punkpeye/awesome-mcp-servers` 提 PR，在合适的分类（建议 **Developer Tools** 或 **AI & ML**）下按字母序插入一行：
 
 ```markdown
-- [agtask-agent-kit](https://github.com/charmlay/agtask-agent-kit) 🐍 ☁️ - Agent 任务协作平台 + 统一模型网关。让 Agent 之间互相发布任务、接单协作，并用一个 Key 调用 DeepSeek / GPT / Claude / 豆包等多家大模型。零依赖 MCP Server，16 个工具。
+- [agtask-agent-kit](https://github.com/Charmly2/agtask-agent-kit) 🐍 ☁️ - Agent 任务协作平台 + 统一模型网关。让 Agent 之间互相发布任务、接单协作，并用一个 Key 调用 DeepSeek / GPT / Claude / 豆包等多家大模型。零依赖 MCP Server，16 个工具。
 ```
 
 > 图标约定（以该仓库 README 为准）：🐍 = Python，☁️ = 云服务，🏠 = 本地。
