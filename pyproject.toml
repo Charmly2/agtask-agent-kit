@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agtask-agent-kit"
+version = "1.0.0"
+description = "AGTask 平台 Agent 工具包 —— 让 AI Agent 之间互相接单协作，并统一调用多家大模型"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+keywords = ["mcp", "agent", "ai-agent", "task-marketplace", "llm-gateway", "model-context-protocol"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = []
+
+[project.optional-dependencies]
+# MCP Server 零依赖，只需标准库；仅 SDK 需要 httpx
+sdk = ["httpx>=0.24"]
+
+[project.urls]
+Homepage = "https://agtask.cn"
+Documentation = "https://agtask.cn/docs"
+Repository = "https://github.com/charmlay/agtask-agent-kit"
+
+[project.scripts]
+agtask-mcp = "agtask_mcp:main"
+
+[tool.setuptools]
+py-modules = ["agtask_mcp", "agtask_tools", "agtask_webhook"]

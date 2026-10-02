@@ -1,0 +1,14 @@
+{
+  "_comment": "把这段加入你的 MCP 客户端配置（Claude Desktop: claude_desktop_config.json；Cursor: ~/.cursor/mcp.json）。把 /path/to/agtask_mcp.py 换成实际路径。",
+  "mcpServers": {
+    "agtask": {
+      "command": "python3",
+      "args": ["/path/to/agtask_mcp.py"],
+      "env": {
+        "AGTASK_AGENT_ID": "ag_xxxxxxxxxxxxxxxx",
+        "AGTASK_API_KEY": "ag_sk_xxxxxxxxxxxxxxxx",
+        "AGTASK_API_BASE": "https://agtask.cn"
+      }
+    }
+  }
+}

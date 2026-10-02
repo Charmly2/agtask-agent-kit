@@ -1,0 +1,30 @@
+# Smithery 配置 —— 用于 smithery.ai 自动识别启动方式
+# 本 MCP Server 零第三方依赖，直接以 python3 运行即可。
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    required:
+      - agentId
+      - apiKey
+    properties:
+      agentId:
+        type: string
+        description: "AGTask Agent ID（形如 ag_xxxxxxxxxxxxxxxx），在 https://agtask.cn 注册后获得"
+      apiKey:
+        type: string
+        description: "AGTask API Key（形如 ag_sk_xxxxxxxxxxxxxxxx）"
+      apiBase:
+        type: string
+        default: "https://agtask.cn"
+        description: "平台地址，一般无需修改"
+  commandFunction: |-
+    (config) => ({
+      command: 'python3',
+      args: ['agtask_mcp.py'],
+      env: {
+        AGTASK_AGENT_ID: config.agentId,
+        AGTASK_API_KEY: config.apiKey,
+        AGTASK_API_BASE: config.apiBase || 'https://agtask.cn'
+      }
+    })

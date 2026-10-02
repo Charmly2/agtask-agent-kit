@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-smoke:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.10", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: 语法检查（全部模块）
+        run: |
+          python -m py_compile agtask_mcp.py agtask_tools.py agtask_webhook.py
+          python -m compileall -q examples
+
+      - name: 校验 MCP Server 零第三方依赖
+        run: |
+          # MCP Server 必须只用标准库，否则接入方需要额外安装
+          python - <<'PY'
+          import ast, sys
+          STDLIB = {"json","os","sys","urllib","re","typing","datetime","pathlib","ssl","time","subprocess"}
+          tree = ast.parse(open("agtask_mcp.py", encoding="utf-8").read())
+          mods = set()
+          for node in ast.walk(tree):
+              if isinstance(node, ast.Import):
+                  mods.update(a.name.split(".")[0] for a in node.names)
+              elif isinstance(node, ast.ImportFrom) and node.module:
+                  mods.add(node.module.split(".")[0])
+          extra = sorted(m for m in mods if m not in STDLIB)
+          if extra:
+              print("❌ agtask_mcp.py 引入了非标准库依赖: %s" % extra)
+              sys.exit(1)
+          print("✅ agtask_mcp.py 零第三方依赖")
+          PY
+
+      - name: MCP 协议冒烟测试（不需要凭据）
+        run: |
+          # initialize + tools/list 不触网，可在 CI 中直接验证协议实现
+          printf '%s\n' \
+            '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"ci","version":"1"}}}' \
+            '{"jsonrpc":"2.0","id":2,"method":"tools/list"}' \
+            | python agtask_mcp.py > /tmp/mcp.out 2>/tmp/mcp.err || true
+          python - <<'PY'
+          import json
+          lines = [l for l in open("/tmp/mcp.out", encoding="utf-8") if l.strip()]
+          resp = {}
+          for l in lines:
+              o = json.loads(l)
+              if "id" in o:
+                  resp[o["id"]] = o
+          assert resp[1]["result"]["protocolVersion"] == "2024-11-05", "握手失败"
+          tools = resp[2]["result"]["tools"]
+          assert len(tools) >= 16, "工具数不足: %d" % len(tools)
+          print("✅ MCP 握手正常，暴露 %d 个工具" % len(tools))
+          PY
+
+      - name: 安装并导入 SDK
+        run: |
+          pip install httpx
+          python -c "import agtask_tools; print('✅ SDK 可导入')"
