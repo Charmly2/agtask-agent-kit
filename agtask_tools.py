@@ -274,24 +274,54 @@ class AgtaskClient:
         """认领一个任务（需认证）。"""
         return self._request("POST", "/api/v1/agent/tasks/%s/claim" % task_id, json={})
 
-    def submit_task(self, task_id: int, output_data: Optional[dict] = None,
-                    result_url: Optional[str] = None) -> dict:
+    # 未提供 result_url 时使用的占位地址。
+    # 服务端现在允许「result_url 与 output_data 至少其一」，本可省略；
+    # 但保留默认值可让 SDK 同时兼容尚未升级的旧服务端 ——
+    # 该设计来自首位真实用户的补丁思路。
+    DEFAULT_RESULT_URL = "https://agtask.cn/"
+
+    def submit_task(self, task_id: int, output_data=None,
+                    result_url=None) -> dict:
         """提交任务成果（需认证）。
 
-        BUGFIX(2026-10-03): 原实现只发 {"output_data": ...}，而服务端要求
-        result_url，导致提交必然 422（首个真实用户即因此受阻）。现同时支持
-        两种成果形式，至少提供其一：
+        支持四种调用方式，且**对已有调用方完全向后兼容**：
 
-            client.submit_task(tid, output_data={"content": "..."})   # 文本类
-            client.submit_task(tid, result_url="https://.../out.mp4") # 文件类
+            # 1) 老写法 —— 传 dict（签名未变，已集成的代码无需改动）
+            client.submit_task(tid, {"content": "译文正文…", "format": "markdown"})
+
+            # 2) 简写 —— 直接给正文字符串
+            client.submit_task(tid, "译文正文…")
+
+            # 3) 文件类成果 —— 显式给 URL
+            client.submit_task(tid, result_url="https://.../out.mp4")
+
+            # 4) URL 内嵌在 dict 里（首位真实用户补丁的写法，保持兼容）
+            client.submit_task(tid, {"content": "...", "result_url": "https://..."})
+
+        result_url 优先级：显式参数 > dict 内嵌 > 占位默认值。
+
+        兼容性说明（2026-10-03）：
+        原实现只发 {"output_data": ...}，而服务端当时强制要求 result_url，
+        提交必然 422。首位真实用户因此受阻并自行打补丁，其思路是
+        「不改函数签名，内部补占位 URL」—— 对已集成用户零改动。
+        本实现在此基础上合并了显式 result_url 参数与字符串简写，取两者之长。
         """
-        payload = {}
-        if output_data is not None:
-            payload["output_data"] = output_data
-        if result_url is not None:
-            payload["result_url"] = result_url
-        if not payload:
-            raise ValueError("submit_task 需要 output_data 或 result_url 至少其一")
+        # 不修改调用方传入的对象
+        if isinstance(output_data, dict):
+            od = dict(output_data)
+        elif isinstance(output_data, str):
+            od = {"content": output_data}
+        else:
+            od = {}
+
+        url = result_url or od.pop("result_url", None) or self.DEFAULT_RESULT_URL
+        if not str(url or "").strip():
+            url = self.DEFAULT_RESULT_URL
+
+        payload = {"result_url": str(url).strip()}
+        if od:
+            payload["output_data"] = od
+
         return self._request(
             "POST",
             "/api/v1/agent/tasks/%s/submit" % task_id,
