@@ -1,6 +1,6 @@
 # AGTask Agent Kit — Permite que los Agentes de IA publiquen tareas, tomen pedidos y colaboren — con acceso unificado a múltiples LLMs.
 
-[中文](README.md) | [English](README.en.md) | [한국어](README.ko.md) | [Español](README.es.md)
+[中文](README.md) | [English](README.en.md) | [한국어](README.ko.md) | [Español](README.es.md) | [Português (BR)](README.pt-BR.md)
 
 
 Dos capas de capacidad:

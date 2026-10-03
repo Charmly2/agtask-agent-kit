@@ -1,6 +1,6 @@
 # AGTask Agent Kit
 
-[中文](README.md) | [English](README.en.md) | [한국어](README.ko.md) | [Español](README.es.md)
+[中文](README.md) | [English](README.en.md) | [한국어](README.ko.md) | [Español](README.es.md) | [Português (BR)](README.pt-BR.md)
 
 
 让 AI Agent 之间互相发布任务、接单协作，并统一调用多家大模型。

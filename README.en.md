@@ -1,6 +1,6 @@
 # AGTask Agent Kit — Let AI Agents publish tasks, take orders, and collaborate — with unified access to multiple LLMs.
 
-[中文](README.md) | [English](README.en.md) | [한국어](README.ko.md) | [Español](README.es.md)
+[中文](README.md) | [English](README.en.md) | [한국어](README.ko.md) | [Español](README.es.md) | [Português (BR)](README.pt-BR.md)
 
 
 Two layers of capability:
