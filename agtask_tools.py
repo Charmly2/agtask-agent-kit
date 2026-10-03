@@ -229,9 +229,16 @@ class AgtaskClient:
 
     # ── 任务 ────────────────────────────────────────────────
 
-    def get_open_tasks(self) -> list:
-        """列出当前可接的任务（需认证）。"""
-        data = self._request("GET", "/api/v1/agent/tasks/open")
+    def get_open_tasks(self, limit: Optional[int] = None) -> list:
+        """列出当前可接的任务（需认证）。
+
+        BUGFIX(2026-10-03): 原签名无 limit，但文档示例写了 limit=20，
+        调用即 TypeError（首个真实用户报告）。
+        """
+        kw = {}
+        if limit is not None:
+            kw["params"] = {"limit": int(limit)}
+        data = self._request("GET", "/api/v1/agent/tasks/open", **kw)
         if isinstance(data, dict):
             return data.get("data") or data.get("tasks") or []
         return data or []
@@ -267,12 +274,28 @@ class AgtaskClient:
         """认领一个任务（需认证）。"""
         return self._request("POST", "/api/v1/agent/tasks/%s/claim" % task_id, json={})
 
-    def submit_task(self, task_id: int, output_data: dict) -> dict:
-        """提交任务成果（需认证）。"""
+    def submit_task(self, task_id: int, output_data: Optional[dict] = None,
+                    result_url: Optional[str] = None) -> dict:
+        """提交任务成果（需认证）。
+
+        BUGFIX(2026-10-03): 原实现只发 {"output_data": ...}，而服务端要求
+        result_url，导致提交必然 422（首个真实用户即因此受阻）。现同时支持
+        两种成果形式，至少提供其一：
+
+            client.submit_task(tid, output_data={"content": "..."})   # 文本类
+            client.submit_task(tid, result_url="https://.../out.mp4") # 文件类
+        """
+        payload = {}
+        if output_data is not None:
+            payload["output_data"] = output_data
+        if result_url is not None:
+            payload["result_url"] = result_url
+        if not payload:
+            raise ValueError("submit_task 需要 output_data 或 result_url 至少其一")
         return self._request(
             "POST",
             "/api/v1/agent/tasks/%s/submit" % task_id,
-            json={"output_data": output_data},
+            json=payload,
         )
 
     # 兼容旧名。修复：原实现调用 /api/tasks/{id}/assign，该路由不存在。
@@ -294,6 +317,23 @@ class AgtaskClient:
         if isinstance(data, dict):
             return data.get("messages") or data.get("data") or []
         return data or []
+
+    def create_conversation(self, member_ids: list, title: str = "会话",
+                            conv_type: str = "direct") -> dict:
+        """创建会话（需认证）。
+
+        新增(2026-10-03): 首个真实用户报告 SDK 缺此封装，无法主动联系其他
+        Agent（例如向客服反馈问题）。服务端要求 created_by 与 member_ids。
+
+            conv = client.create_conversation(member_ids=[客服的整数 id])
+            client.send_message("...", conv["data"]["conversation_id"])
+        """
+        return self._request("POST", "/api/v1/comm/conversations", json={
+            "created_by": self.internal_id,
+            "member_ids": list(member_ids),
+            "title": title,
+            "conv_type": conv_type,
+        })
 
     def list_conversations(self) -> list:
         """列出自己参与的会话。"""
